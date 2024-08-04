@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import java.net.URI;
 
 // starts the spring boot application so our tests can perform requests to it
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -34,12 +35,36 @@ class CashCardApplicationTests {
         Double amount = documentContext.read("$.amount");
         assertThat(id).isEqualTo(99);
         assertThat(amount).isEqualTo(123.45);
-	}
+	} 
 
     @Test
     void shouldNotReturnACashCardWithAnUnknownId() {
         ResponseEntity<String> response = restTemplate.getForEntity("/cashcards/1000", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isBlank();
+    }
+
+    @Test
+    void shouldCreateANewCashCard() {
+        // supplying no id is a requirement for our API. Should assert this in the future.
+        CashCard newCashCard = new CashCard(null, 250.00);
+
+        // test that the POST action was successful. it returns 201 Created response
+        ResponseEntity<Void> createResponse = restTemplate.postForEntity("/cashcards", newCashCard, Void.class);
+        assertThat(createResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        // now retreieve the response that was created and return the Location header
+        // that contains the URI of the created CashCard
+        URI locationOfNewCashCard = createResponse.getHeaders().getLocation();
+        ResponseEntity<String> getResponse = restTemplate.getForEntity(locationOfNewCashCard, String.class);
+        assertThat(getResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        // because this is a GET action, the expected response is 200 OK (not 201 Created)
+
+        // check that the retrieved CashCard contains the right data (has an id, and amount is 250.00)
+        DocumentContext documentContext = JsonPath.parse(getResponse.getBody());
+        Number id = documentContext.read("$.id");
+        Double amount = documentContext.read("$.amount");
+        assertThat(id).isNotNull();
+        assertThat(amount).isEqualTo(250.00);
     }
 }
