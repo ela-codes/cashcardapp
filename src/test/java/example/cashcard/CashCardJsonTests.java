@@ -13,10 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /*
- * The @JsonTest annotation marks the CashCardJsonTest as a test class which uses the Jackson framework (which is included as part of Spring). This provides extensive JSON testing and parsing support. It also establishes all the related behavior to test JSON objects.
-
-JacksonTester is a convenience wrapper to the Jackson JSON parsing library. It handles serialization and deserialization of JSON objects.
-@Autowired is an annotation that directs Spring to create an object of the requested type.
+ * The @JsonTest annotation marks the CashCardJsonTest as a test class which uses the Jackson framework (which is * included as part of Spring). This provides extensive JSON testing and parsing support. It also establishes all * the related behavior to test JSON objects.
+ * JacksonTester is a convenience wrapper to the Jackson JSON parsing library. It handles serialization and 
+ * deserialization of JSON objects.
+ * @Autowired is an annotation that directs Spring to create an object of the requested type.
  */
 @JsonTest
 class CashCardJsonTest {
@@ -37,7 +37,7 @@ class CashCardJsonTest {
                     new CashCard(101L, 150.00));
     }
 
-    /**
+    /*
      * Runs the test for converting an object into a string.
      * TDD - Design this test so that it is the expected outcome. 
      * (ie. include the necessary classes like instantiating things. it will fail but the next step is to write the code so that it passes the test.)
