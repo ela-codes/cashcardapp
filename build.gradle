@@ -22,9 +22,9 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // Add two dependencies
     implementation 'org.springframework.data:spring-data-jdbc'
     implementation 'com.h2database:h2'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {

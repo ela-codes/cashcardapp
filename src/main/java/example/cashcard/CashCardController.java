@@ -1,16 +1,16 @@
 package example.cashcard;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import java.util.Optional;
-import java.util.List;
-import java.net.URI;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
 
 @RestController //annotates this class as capable of handling http requests
 @RequestMapping("/cashcards") // companion to @RestController that indicates which address requests must have in order to access this controller
@@ -56,9 +56,11 @@ class CashCardController {
         Page<CashCard> page = cashCardRepository.findAll(
             PageRequest.of(
                 pageable.getPageNumber(),
-                pageable.getPageSize()
-            )
-        );
+                pageable.getPageSize(),
+                pageable.getSortOr(Sort.by(Sort.Direction.ASC, "amount"))
+                //default paging is page=0&size=20
+                //defined values for sorting
+            ));
         return ResponseEntity.ok(page.getContent());
     }
 }
