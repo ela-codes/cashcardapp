@@ -56,7 +56,7 @@ class CashCardApplicationTests {
     @DirtiesContext
     void shouldCreateANewCashCard() {
         // supplying no id is a requirement for our API. Should assert this in the future.
-        CashCard newCashCard = new CashCard(null, 250.00 , "sarah1");
+        CashCard newCashCard = new CashCard(null, 250.00 , null);
 
         // test that the POST action was successful. it returns 201 Created response
         ResponseEntity<Void> createResponse = restTemplate
@@ -153,5 +153,21 @@ class CashCardApplicationTests {
             .withBasicAuth("sarah1", "BAD-PASSWORD")
             .getForEntity("/cashcards/99", String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void shouldRejectUsersWhoAreNotCardOwners() {
+        ResponseEntity<String> response = restTemplate
+            .withBasicAuth("hank-owns-no-cards", "qrs456")
+            .getForEntity("/cashcards/99", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void shouldNotAllowAccessToCashCardTheyDoNotOwn() {
+        ResponseEntity<String> response = restTemplate
+            .withBasicAuth("sarah1", "abc123")
+            .getForEntity("/cashcards/102", String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

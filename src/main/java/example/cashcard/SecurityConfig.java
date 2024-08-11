@@ -2,9 +2,7 @@ package example.cashcard;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,9 +18,10 @@ class SecurityConfig {
         // purpose is to configure the filter chain for the cashcard application
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/cashcards/**") // requests to this URL requires authentication
-                .authenticated())
+                // .authenticated()
+                .hasRole("CARD-OWNER")) // enable RBAC
             .httpBasic(Customizer.withDefaults()) // enables HTTP basic authentication settings
-            .csrf(csrf -> csrf.disable()); // disable cross-site request forgery protection which is on by default since it's a simple app
+            .csrf(csrf -> csrf.disable()); // disable since app will be used by non-browser clients
         return http.build();
     }
 
@@ -32,9 +31,15 @@ class SecurityConfig {
         UserDetails sarah = users
             .username("sarah1")
             .password(passwordEncoder.encode("abc123"))
-            .roles()
+            .roles("CARD-OWNER") // new role
             .build();
-        return new InMemoryUserDetailsManager(sarah);
+        
+        UserDetails hankOwnsNoCards = users
+            .username("hank-owns-no-cards")
+            .password(passwordEncoder.encode("qrs456"))
+            .roles("NON-OWNER") // new role
+            .build();
+        return new InMemoryUserDetailsManager(sarah, hankOwnsNoCards);
 
     }
 
