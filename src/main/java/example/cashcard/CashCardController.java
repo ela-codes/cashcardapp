@@ -71,5 +71,18 @@ class CashCardController {
         return ResponseEntity.ok(page.getContent());
     }
 
+    @PutMapping("/{requestedId}")
+    private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate, Principal principal) {
+        CashCard cashCard = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        // application should return 404 not found if cashCard could not be found (otherwise program "crashes" and returns 403 forbidden, courtesy of spring security)
+        if(cashCard != null) {
+            CashCard updatedCashCard = new CashCard(cashCard.id(), cashCardUpdate.amount(), principal.getName());
+            cashCardRepository.save(updatedCashCard);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+
 }
 
