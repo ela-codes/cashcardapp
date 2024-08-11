@@ -10,7 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
+// import java.util.Optional;
 import java.security.Principal;
 
 @RestController //annotates this class as capable of handling http requests
@@ -24,9 +24,15 @@ class CashCardController {
         this.cashCardRepository = cashCardRepository;
     }
 
+    // helper method
+    private CashCard findCashCard(Long requestedId, Principal principal) {
+        return cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+    }
+
     @GetMapping("/{requestedId}") 
-    //marks findById() as a handler method for GET requests that match cashcards/{requestedId}
+    // marks findById() as a handler method for GET requests that match cashcards/{requestedId}
     private ResponseEntity<CashCard> findById(@PathVariable Long requestedId, Principal principal) {
+        /*
         Optional<CashCard> cashCardOptional = Optional.ofNullable(
             cashCardRepository.findByIdAndOwner(
                 requestedId, principal.getName()
@@ -35,6 +41,17 @@ class CashCardController {
         
         if(cashCardOptional.isPresent()) {
             return ResponseEntity.ok(cashCardOptional.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+        */
+
+        // refactor. more concise and readable.
+        CashCard cashCard = findCashCard(requestedId, principal);
+
+        if (cashCard != null) {
+            // return 200 OK along with cashCard as the body
+            return ResponseEntity.ok(cashCard);
         } else {
             return ResponseEntity.notFound().build();
         }
@@ -73,7 +90,7 @@ class CashCardController {
 
     @PutMapping("/{requestedId}")
     private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, @RequestBody CashCard cashCardUpdate, Principal principal) {
-        CashCard cashCard = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        CashCard cashCard = findCashCard(requestedId, principal);
         // application should return 404 not found if cashCard could not be found (otherwise program "crashes" and returns 403 forbidden, courtesy of spring security)
         if(cashCard != null) {
             CashCard updatedCashCard = new CashCard(cashCard.id(), cashCardUpdate.amount(), principal.getName());
